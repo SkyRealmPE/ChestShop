@@ -50,9 +50,9 @@ class Main extends PluginBase{
 	];
 
 	const HELP_CMD = [
-		TF::YELLOW.TF::BOLD.'Chest Shop'.TF::RESET,
-		TF::YELLOW.'/{cmd} add [price]'.TF::GRAY.' - Add the item in your hand to the chest shop.',
-		TF::YELLOW.'/{cmd} remove [page] [slot]'.TF::GRAY.' - Remove an item off the chest shop.',
+		TF::YELLOW.TF::BOLD.'Auction Shop'.TF::RESET,
+		TF::YELLOW.'/{cmd} add [price]'.TF::GRAY.' - Add the item in your hand to the Auction House.',
+		TF::YELLOW.'/{cmd} remove [page] [slot]'.TF::GRAY.' - Remove an item off the Auction House.',
 		TF::YELLOW.'/{cmd} reload'.TF::GRAY.' - Reload the plugin (to fix errors or refresh data).'
 	];
 
@@ -147,7 +147,7 @@ class Main extends PluginBase{
 		$this->menu = InvMenu::create(InvMenu::TYPE_CHEST)
 			->readOnly()
 			->sessionize()
-			->setName("Chest Shop")
+			->setName("SkyRealm's Auction")
 			->setListener([new ShopListener($this), "onTransaction"]);
 	}
 
@@ -231,7 +231,7 @@ class Main extends PluginBase{
 				}
 
 				$item->setNamedTag($nbt = unserialize($data[3]));
-				$item->setCustomName(TF::RESET.$item->getName()."\n \n".TF::YELLOW.'Tap to purchase for '.TF::BOLD.'$'.$nbt->getIntArray('ChestShop')[0].TF::RESET);
+				$item->setCustomName(TF::RESET.$item->getName()."\n \n".TF::YELLOW.'Tap to purchase for '.TF::BOLD.'$'.$nbt->getIntArray('Auction')[0].TF::RESET);
 				$contents[] = $item;
 			}
 		}
@@ -258,7 +258,7 @@ class Main extends PluginBase{
 	 */
 	public function addToChestShop(Item $item, int $price) : void{
 		while(isset($this->shops[$key = rand()]));
-		$item->setNamedTagEntry(new IntArrayTag('ChestShop', [$price, $key]));
+		$item->setNamedTagEntry(new IntArrayTag('Auction', [$price, $key]));
 		$this->shops[$key] = [$item->getId(), $item->getDamage(), $item->getCount(), serialize($item->getNamedTag())];
 	}
 
@@ -313,15 +313,15 @@ class Main extends PluginBase{
 					$sender->sendMessage(str_replace('{cmd}', $cmd, implode("\n", self::HELP_CMD)));
 					break;
 				case "about":
-					$sender->sendMessage(TF::YELLOW.TF::BOLD.'ChestShop'.TF::RESET."\n".TF::GRAY.'Created by Muqsit ('.TF::AQUA.'@muqsitrayyan'.TF::GRAY.').');
+					$sender->sendMessage(TF::YELLOW.TF::BOLD.'Auction House'.TF::RESET."\n".TF::GRAY.'Created by SkyRealmNetwork('.TF::AQUA.'@skyrealmnetwork'.TF::GRAY.').');
 					break;
 				case "add":
-					if($sender->hasPermission('chestshop.command.add')){
+					if($sender->hasPermission('auction.command.add')){
 						$item = $sender->getInventory()->getItemInHand();
 						if($item->isNull()){
 							$sender->sendMessage(self::PREFIX.TF::RED.'Please hold an item in your hand.');
 						}elseif($this->isNotAllowed($item->getId(), $item->getDamage())){
-							$sender->sendMessage(self::PREFIX.TF::RED.'You cannot sell '.((Item::get($item->getId(), $item->getDamage()))->getName()).' on /chestshop.');
+							$sender->sendMessage(self::PREFIX.TF::RED.'You cannot sell '.((Item::get($item->getId(), $item->getDamage()))->getName()).' on /ah.');
 						}else{
 							if(isset($args[1]) && is_numeric($args[1]) && $args[1] >= 0) {
 								$sender->sendMessage(self::PREFIX.TF::YELLOW.'Added '.(explode("\n", $item->getName())[0]).' to '.$cmd->getName().' for $'.$args[1].'.');
@@ -333,7 +333,7 @@ class Main extends PluginBase{
 					}
 					break;
 				case "removebyid":
-					if($sender->hasPermission('chestshop.command.remove')){
+					if($sender->hasPermission('auction.command.remove')){
 						if(isset($args[1]) && is_numeric($args[1]) && $args[1] >= 1){
 							$damage = $args[2] ?? 0;
 							if(count($this->shops) <= 27){
@@ -354,7 +354,7 @@ class Main extends PluginBase{
 					}
 					break;
 				case "remove":
-					if($sender->hasPermission('chestshop.command.remove')){
+					if($sender->hasPermission('auction.command.remove')){
 						if(isset($args[1], $args[2]) && is_numeric($args[1]) && is_numeric($args[2]) && ($args[1] >= 0) && ($args[2] >= 1)){
 							$sender->sendMessage(self::PREFIX.TF::YELLOW.'Removed item on page #'.$args[1].', slot #'.$args[2].'.');
 							$this->removeItemOffShop($args[1], $args[2]);
@@ -364,14 +364,14 @@ class Main extends PluginBase{
 					}
 					break;
 				case "reload":
-					if($sender->hasPermission('chestshop.command.reload')){
+					if($sender->hasPermission('auction.command.reload')){
 						$sender->sendMessage(self::PREFIX.TF::AQUA.'ChestShop is reloading...');
 						$this->reload();
 						$sender->sendMessage(self::PREFIX.TF::AQUA.'ChestShop has reloaded successfully.');
 					}
 					break;
 				case "synceconomy":
-					if($sender->hasPermission('chestshop.command.opcmd')){
+					if($sender->hasPermission('auction.command.opcmd')){
 						switch($this->economyshop){
 							case null:
 								$sender->sendMessage(TF::RED."Couldn't find EconomyShop plugin. Make sure the plugin is enabled and running.");
@@ -402,7 +402,7 @@ class Main extends PluginBase{
 					}
 					break;
 				default:
-					$sender->sendMessage(TF::RED.'Type /cs help to get a list of chest shop help commands.');
+					$sender->sendMessage(TF::RED.'Type /ah help to get a list of auction house help commands.');
 					break;
 			}
 		}else{
