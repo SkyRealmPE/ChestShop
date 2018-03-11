@@ -56,8 +56,8 @@ class ShopListener{
 			$pagedata = $nbt->getIntArray("turner");
 			$page = $pagedata[Main::NBT_TURNER_DIRECTION] === Main::LEFT_TURNER ? --$pagedata[Main::NBT_TURNER_CURRENTPAGE] : ++$pagedata[Main::NBT_TURNER_CURRENTPAGE];
 			$this->plugin->fillInventoryWithShop($inventoryAction->getInventory(), $page);
-		}elseif($nbt->hasTag("ChestShop")){
-			$cs = $nbt->getIntArray("ChestShop");
+		}elseif($nbt->hasTag("AuctionShop")){
+			$cs = $nbt->getIntArray("AuctionShop");
 
 			$price = $cs[Main::NBT_CHESTSHOP_PRICE] ?? $this->plugin->defaultprice;
 			if($this->economy->myMoney($player) >= $price){
